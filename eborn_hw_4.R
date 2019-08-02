@@ -17,29 +17,62 @@ ggplot(dat, aes(x=Education, y=Score)) +
 cor(dat$Education, dat$Score)
 
 # 2)
-# Simple linear regression
-ggplot(dat, aes(x=Education, y=Score)) +
+# Predict score from education
+# Fit the linear model
+fit <- lm(Score ~ Education, data=dat)
+
+# Predicted score values from education
+dat$predicted <- predict(fit)
+
+# compute the residual
+dat$residual <- resid(fit)
+
+# write new csv file with added columns
+#write.csv(dat, file = 'data.csv')
+
+# plot the residual
+qplot(dat$Education, dat$residual) +
   geom_point(color='blue') +
-  geom_smooth(color='red', method = 'lm', se = FALSE) +
-  xlab('Years of Education') + ylab ('Prestige Score') +
-  ggtitle("Scatterplot between years of education and prestige score") +
+  geom_hline(yintercept = 0, color = 'red') +
+  ylab('Residuals') + xlab('Education') +
+  ggtitle("Residual plot for education and prestige score") +
   theme(plot.title = element_text(hjust = 0.5))
 
-# Boxplot for education
-ylab <- list(title = "Education")
-plot_ly(dat, y = ~Education, name = 'Education', type = 'box')%>%
-  layout(yaxis = ylab, title = 'Years of Education')
+# Using some filtering on residual I found there are 10 rows 
+# where the residual is > 35 or less -35
+dat[dat$residual > 35 | dat$residual < -35, ]
 
-# Boxplot for score
-ylab <- list(title = "Score")
-plot_ly(dat, y = ~Score, name = 'Score', type = 'box')%>%
-  layout(yaxis = ylab, title = 'Prestige Score')
+# Filtering on education there is only 1 row with education
+# greater than 17 and 1 row with it less than 4
+dat[dat$Education > 17 | dat$Education < 5, ]
 
-min(dat$Education)
-max(dat$Education)
+# reversing the signs and switching the 'or' symbol to the 'and' symbol
+# to create a new dataset to plot and evaluate
+new.dat <- dat[dat$residual < 35 & dat$residual > -35, ]
+new.dat <- new.dat[new.dat$Education < 17 & new.dat$Education > 5, ]
 
-subset(dat, Education < 5 | Education > 17)
+# Create a new fit
+new.fit <- lm(Score ~ Education, data=new.dat)
 
-min(dat$Score)
-max(dat$Score)
-subset(dat, Score < 18 | Score > 90)
+# New predicted score values from education
+new.dat$predicted <- predict(new.fit)
+
+# new residuals
+new.dat$residual <- resid(new.fit)
+
+# Correlation between the two attributes
+cor(new.dat$Education, new.dat$Score)
+
+# plot with very large and small residuals and education removed 
+qplot(new.dat$Education, new.dat$residual) +
+  geom_point(color='blue') +
+  geom_hline(yintercept = 0, color = 'red') +
+  ylab('Residuals') + xlab('Education') +
+  ggtitle("New reduced Residual plot") +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+
+# 3)
+dat2 <- dat.frame(Education, Income, Score, WorkforceWomen)
+
+dat
