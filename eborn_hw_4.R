@@ -73,6 +73,36 @@ qplot(new.dat$Education, new.dat$residual) +
   
 
 # 3)
-dat2 <- dat.frame(Education, Income, Score, WorkforceWomen)
+# attach dataset dat
+attach(dat)
 
-dat
+# Create a linear model predicting Score 
+# from Education + Income + WorkforceWomen
+mlr.fit <- lm(Score ~ Education + Income + WorkforceWomen)
+
+# Observe the models variances
+anova(mlr.fit)
+
+#f distribution F3,98,0.05
+# 95% confidence, alpha 0.05, degrees of freedom 3 and 98
+# n = sample size, k = number of predictors, - 1
+# res df = n - k - 1
+# res df = 102 - 3 - 1 = 98
+# 2.697423
+qf(0.95, 3, 98)
+
+# Observe the F-statistic with summary
+# 0.407 > 2.697423
+summary(mlr.fit)
+
+# 4)
+# Evaluate the individual predictors
+# Using right hand tailed T test a = 0.975, df = 98
+# T value needs to be >= 1.984467
+qt(0.975, 98)
+
+summary(mlr.fit)
+
+confint(mlr.fit, level = 0.95)
+
+detach(dat)
