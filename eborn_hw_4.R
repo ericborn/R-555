@@ -1,5 +1,4 @@
 library(ggplot2)
-library(plotly)
 
 # 1)
 # Read the data into R
@@ -96,13 +95,67 @@ qf(0.95, 3, 98)
 summary(mlr.fit)
 
 # 4)
-# Evaluate the individual predictors
-# Using right hand tailed T test a = 0.975, df = 98
-# T value needs to be >= 1.984467
-qt(0.975, 98)
+# Evaluate the individual predictors using a t-test
+# n-k-1 = 102 - 3 - 1 = 98 with a probability of 0.05/2 = 0.025
+# t (0.025, 0.975), 98
+# -1.984467  1.984467
+qt(c(0.025, 0.975), 98)
 
+# Display T values for each of the predictors
+# None of them are > 1.984467 or < -1.984467
+# therefore the null hypothesis cannot be rejected.
 summary(mlr.fit)
 
-confint(mlr.fit, level = 0.95)
+# 5)
+# observe residual values
+sort(round(resid(mlr.fit), 3) * 10)
+
+# observe fitted values
+sort(round(fitted(mlr.fit), 1))
+
+# Store fitted and residual values
+mlr.fitted <- fitted(mlr.fit)
+mlr.resid <- resid(mlr.fit)
+
+# Generate plot
+qplot(mlr.fitted, mlr.resid) +
+  geom_point(color='blue') +
+  geom_hline(yintercept = 0, color = 'red') +
+  ylab('Residuals') + xlab('fitted values') +
+  ggtitle("Residual and fitted values plot") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Find the large x value index locations
+# 51, 90, 95
+mlr.fitted[mlr.fitted > 55.6]
+
+# Create new dataset with points removed
+
+####!!!!!!!! This didnt remove the correct rows#########!!!!!!!
+new.dat <- dat[-c(51, 90, 95)]
 
 detach(dat)
+
+attach(new.dat)
+new.fit <- lm(Score ~ Education + Income + WorkforceWomen)
+
+
+
+new.fitted <- fitted.values(new.fit)
+new.resid <- resid(new.fit)
+
+# Generate plot
+qplot(new.fitted, new.resid) +
+  geom_point(color='blue') +
+  geom_hline(yintercept = 0, color = 'red') +
+  ylab('Residuals') + xlab('fitted values') +
+  ggtitle("Residual and fitted values plot") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+
+
+####### May need to use this code even tho no change was noticed########
+# remove large x values from both dataframes
+#mlr.fitted.red <- mlr.fitted[-c(51, 90, 95)]
+#mlr.resid.red <- mlr.resid[-c(51, 90, 95)]
