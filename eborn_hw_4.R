@@ -125,27 +125,17 @@ qplot(mlr.fitted, mlr.resid) +
   ggtitle("Residual and fitted values plot") +
   theme(plot.title = element_text(hjust = 0.5))
 
+# 6)
 # Find the large x value index locations
 # 51, 90, 95
 mlr.fitted[mlr.fitted > 55.6]
 
-# Create new dataset with points removed
-
-####!!!!!!!! This didnt remove the correct rows#########!!!!!!!
-new.dat <- dat[-c(51, 90, 95)]
-
-detach(dat)
-
-attach(new.dat)
-new.fit <- lm(Score ~ Education + Income + WorkforceWomen)
-
-
-
-new.fitted <- fitted.values(new.fit)
-new.resid <- resid(new.fit)
+# remove large x values from both dataframes
+mlr.fitted.red <- mlr.fitted[-c(51, 90, 95)]
+mlr.resid.red <- mlr.resid[-c(51, 90, 95)]
 
 # Generate plot
-qplot(new.fitted, new.resid) +
+qplot(mlr.fitted.red, mlr.resid.red) +
   geom_point(color='blue') +
   geom_hline(yintercept = 0, color = 'red') +
   ylab('Residuals') + xlab('fitted values') +
@@ -153,9 +143,3 @@ qplot(new.fitted, new.resid) +
   theme(plot.title = element_text(hjust = 0.5))
 
 
-
-
-####### May need to use this code even tho no change was noticed########
-# remove large x values from both dataframes
-#mlr.fitted.red <- mlr.fitted[-c(51, 90, 95)]
-#mlr.resid.red <- mlr.resid[-c(51, 90, 95)]
