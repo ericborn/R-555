@@ -48,6 +48,51 @@ x <- list(title = 'Age')
 plot_ly(data = dat, x = ~age, y= ~iq, color = ~group, type = 'scatter') %>%
   layout(title = 'IQ vs Age distribution', xaxis = x, yaxis = y)
 
+# 2) 
+# Fit a one way anova model
+my_anova <- aov(dat$iq~dat$group)
+
+# F value = 512
+# MSB = 646.9
+# MSW = 1.3
+summary(my_anova)
+
+fisher.test(dat$iq, y= dat$group)
+
+f <- 512
+
+# Statistic value
+# 497.6154
+value <- 646.9 / 1.3
+
+# testing if the statistic value is less than the f value returns True
+# Therefore we cannot reject the null hypothesis
+value < f
+
+# 3)
+# Create dummy variables for the dataset
+dat$g0 <- ifelse(dat$group=='Chemistry student', 1, 0)
+dat$g1 <- ifelse(dat$group=='Math student', 1, 0)
+dat$g2 <- ifelse(dat$group=='Physics student', 1, 0)
+
+# Reference group is Chemistry student g0, which is excluded from the model
+m2 <- lm(dat$iq ~ dat$g1 + dat$g2, data = dat)
+
+# Comparing the
+aov(my_anova)
+aov(m2)
+
+# print summary
+# t value of physics g2 was -30.54
+summary(m2)
+
+
+
+
+
+TukeyHSD(m)
+
+
 
 #data.frame(table(dat$group))
 
