@@ -1,5 +1,7 @@
-# how many students are in each group?
+# Read the data into R
+dat <- read.csv(file='c:/CS_555_Assignment_5.csv', sep = ',')
 
+# how many students are in each group?
 # Count of students
 # 15 in each group
 table(dat$group)
@@ -50,8 +52,10 @@ dat$g0 <- ifelse(dat$group=='Chemistry student', 1, 0)
 dat$g1 <- ifelse(dat$group=='Math student', 1, 0)
 dat$g2 <- ifelse(dat$group=='Physics student', 1, 0)
 
-m2 <- lm(dat$group ~ dat$g0 + dat$g1 + dat$g2, data = dat)
+# Exclude reference group when creating the lm
+# Excluded group was Chemistry student g0
+m2 <- lm(dat$iq ~ dat$g1 + dat$g2, data = dat)
 
-anova.model <- aov(dat$group~Chemistry student, data = dat)
-
+# print summary
+# t value of physics g2 was -30.54
 summary(m2)
