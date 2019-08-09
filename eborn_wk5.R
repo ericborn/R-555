@@ -1,5 +1,6 @@
-library(ggplot2)
+#library(ggplot2)
 library(plotly)
+library(car)
 
 # 1)
 # Read the data into R
@@ -22,7 +23,7 @@ summary(chem.stu)
 summary(math.stu)
 summary(phys.stu)
 
-# Age distributions
+# Histogram for Age distributions
 age1 <- plot_ly(chem.stu, x = ~age, type = 'histogram', name = 'chemistry')
 age2 <- plot_ly(math.stu, x = ~age, type = 'histogram', name = 'math')
 age3 <- plot_ly(phys.stu, x = ~age, type = 'histogram', name = 'physics')
@@ -30,7 +31,13 @@ age3 <- plot_ly(phys.stu, x = ~age, type = 'histogram', name = 'physics')
 subplot(age1, age2, age3, nrows = 2) %>% 
   layout(title = "Age Distribution")
 
-# IQ distributions
+# Boxplot for age by group
+y <- list(title = "Age")
+x <- list(title = 'Student group')
+plot_ly(dat, x =~group, y = ~age, type = 'box') %>%
+  layout(title = 'Age distribution by Student group', xaxis = x, yaxis = y)
+
+# Histogram for IQ distributions
 iq1 <- plot_ly(chem.stu, x = ~iq, type = 'histogram', name = 'chemistry')
 iq2 <- plot_ly(math.stu, x = ~iq, type = 'histogram', name = 'math')
 iq3 <- plot_ly(phys.stu, x = ~iq, type = 'histogram', name = 'physics')
@@ -38,17 +45,19 @@ iq3 <- plot_ly(phys.stu, x = ~iq, type = 'histogram', name = 'physics')
 subplot(iq1, iq2, iq3, nrows = 2) %>% 
   layout(title = "IQ Distribution")
 
-iq1 <- plot_ly(chem.stu, x = ~iq, type = 'histogram', name = 'chemistry')
-iq2 <- plot_ly(math.stu, x = ~iq, type = 'histogram', name = 'math')
-iq3 <- plot_ly(phys.stu, x = ~iq, type = 'histogram', name = 'physics')
+# Boxplot for IQ by group
+y <- list(title = "IQ")
+x <- list(title = 'Group')
+plot_ly(dat, x =~group, y = ~iq, type = 'box') %>%
+  layout(title = 'IQ distribution by group type', xaxis = x, yaxis = y)
 
-# Whole dataset scatter
+# Whole dataset scatterplot
 y <- list(title = "IQ")
 x <- list(title = 'Age')
 plot_ly(data = dat, x = ~age, y= ~iq, color = ~group, type = 'scatter') %>%
   layout(title = 'IQ vs Age distribution', xaxis = x, yaxis = y)
 
-# 2) 
+# 2)
 # Fit a one way anova model
 my_anova <- aov(dat$iq~dat$group)
 
@@ -56,9 +65,6 @@ my_anova <- aov(dat$iq~dat$group)
 # MSB = 646.9
 # MSW = 1.3
 summary(my_anova)
-
-fisher.test(dat$iq, y= dat$group)
-
 f <- 512
 
 # Statistic value
@@ -78,33 +84,18 @@ dat$g2 <- ifelse(dat$group=='Physics student', 1, 0)
 # Reference group is Chemistry student g0, which is excluded from the model
 m2 <- lm(dat$iq ~ dat$g1 + dat$g2, data = dat)
 
-# Comparing the
+# Comparing the two models using aov
 aov(my_anova)
 aov(m2)
 
-# print summary
-# t value of physics g2 was -30.54
+# Comparing summaries of both models
+summary(m1)
 summary(m2)
 
+# 4)
+# ANCOVA
+# Now we run ANVOA with adjusting for age 
+Anova(lm(dat$iq ~ dat$group), type=3)
 
+Anova(lm(dat$iq ~ dat$group + dat$age), type=3)
 
-
-
-TukeyHSD(m)
-
-
-
-#data.frame(table(dat$group))
-
-is.factor(dat$group.Chem)
-
-mean(dat$iq, by=list(dat$group))
-
-aggregate(dat$age, by=list(dat$group), summary)
-aggregate(dat$iq, by=list(dat$group), mean)
-
-aggregate(dat$age, by=list(dat$group), sd)
-aggregate(dat$iq, by=list(dat$group), sd)
-
-
-anova(dat)
