@@ -1,6 +1,7 @@
 #library(ggplot2)
 library(plotly)
 library(car)
+library(emmeans)
 
 # 1)
 # Read the data into R
@@ -61,19 +62,65 @@ plot_ly(data = dat, x = ~age, y= ~iq, color = ~group, type = 'scatter') %>%
 # Fit a one way anova model
 my_anova <- aov(dat$iq~dat$group)
 
-# F value = 512
+summary(my_anova)
+
 # MSB = 646.9
 # MSW = 1.3
-summary(my_anova)
-f <- 512
+
+# find degrees of freedom 2, 42 at alpha 0.05
+f <- qf(0.95, df1 = 2, df2 = 42)
 
 # Statistic value
 # 497.6154
 value <- 646.9 / 1.3
 
-# testing if the statistic value is less than the f value returns True
-# Therefore we cannot reject the null hypothesis
+# testing if the statistic value is less than the f value 
+# returns false therefore we can reject the null hypothesis
 value < f
+
+# Outputting Tukey's
+TukeyHSD(my_anova)
+
+# Manual calculation of Tukeys
+# total sample size
+N <- length(dat$group) 
+
+# number of treatments
+k <- length(unique(dat$group)) 
+
+# number of samples per group (since sizes are equal)
+n <- length(dat$group) / k 
+
+# Mean Square
+students <- split(dat, dat$group)
+
+# Sum of squared errors
+sse <- sum(Reduce('+', lapply(students, function(x) {
+  (length(x[,1]) - 1) * sd(x[,1])^2
+})))
+
+# Calculating the mean squared error
+mse <- sse / (N - k)
+
+# Q value
+q.value <- qtukey(p = 0.95, nmeans = k, df = N - k)
+
+# Calculating Tukey's HSD
+tukey.hsd <- q.value * sqrt(mse / n)
+
+# Group means
+means <- tapply(dat$iq, dat$group, mean)
+
+chem.math.diff <- means[2] - means[1]
+phys.chem.diff <- means[3] - means[1]
+phys.math.diff <- means[3] - means[2]
+
+# There is significant differnce between all three of the groups
+for (i in list(chem.math.diff, phys.chem.diff, phys.math.diff)) {
+  print(abs(i) >= tukey.hsd)
+}
+
+
 
 # 3)
 # Create dummy variables for the dataset
@@ -83,6 +130,11 @@ dat$g2 <- ifelse(dat$group=='Physics student', 1, 0)
 
 # Reference group is Chemistry student g0, which is excluded from the model
 m2 <- lm(dat$iq ~ dat$g1 + dat$g2, data = dat)
+
+# residuals
+m1.res <- resid(m1)
+# residuals plot
+plot_ly(data = dat, x = dat$iq, y = m1.res, type = 'scatter')
 
 # Comparing the two models using aov
 aov(my_anova)
@@ -94,8 +146,9 @@ summary(m2)
 
 # 4)
 # ANCOVA
-# Now we run ANVOA with adjusting for age 
-Anova(lm(dat$iq ~ dat$group), type=3)
+# Now we run ANVOA adjusting for age 
+m3 <- Anova(lm(dat$iq ~ dat$group + dat$age), type=3)
 
-Anova(lm(dat$iq ~ dat$group + dat$age), type=3)
+
+#Anova(lm(dat$iq ~ dat$group), type=3)
 
