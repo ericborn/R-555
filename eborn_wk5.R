@@ -120,8 +120,6 @@ for (i in list(chem.math.diff, phys.chem.diff, phys.math.diff)) {
   print(abs(i) >= tukey.hsd)
 }
 
-
-
 # 3)
 # Create dummy variables for the dataset
 dat$g0 <- ifelse(dat$group=='Chemistry student', 1, 0)
@@ -131,24 +129,22 @@ dat$g2 <- ifelse(dat$group=='Physics student', 1, 0)
 # Reference group is Chemistry student g0, which is excluded from the model
 m2 <- lm(dat$iq ~ dat$g1 + dat$g2, data = dat)
 
-# residuals
-m1.res <- resid(m1)
-# residuals plot
-plot_ly(data = dat, x = dat$iq, y = m1.res, type = 'scatter')
-
 # Comparing the two models using aov
 aov(my_anova)
 aov(m2)
 
 # Comparing summaries of both models
-summary(m1)
+summary(my_anova)
 summary(m2)
 
 # 4)
 # ANCOVA
 # Now we run ANVOA adjusting for age 
-m3 <- Anova(lm(dat$iq ~ dat$group + dat$age), type=3)
+Anova(lm(dat$iq ~ dat$group + dat$age), type=3)
+my.model<-lm(iq~group+age,  data = dat)
 
+emm_options(contrasts=c("contr.treatment", "contr.poly"))
+emmeans(my.model, specs = "group")
 
-#Anova(lm(dat$iq ~ dat$group), type=3)
-
+# or with pairwise comnparisions 
+emmeans(my.model, specs = "group", contr = "pairwise")
