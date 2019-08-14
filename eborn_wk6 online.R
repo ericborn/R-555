@@ -34,10 +34,17 @@ prop.test(x=tab["1",], n=colSums(tab), correct=FALSE)
 # create dummy variables female(2) = 1, male(1) = 0
 dat$s0 <- ifelse(dat$sex==2, 1, 0)
 
+# What is the regression coefficient for girls in your logistic regression?
+
 # logisitic regression with temp_level as the response
 # and sex as the predictor or explanatory variable.
+#1.8589
 m<-glm(temp_level ~ sex, data = dat, family = 'binomial')
 
-summary(m)
+# What is the odds ratio for girls?
+# 6.4167
+exp(cbind(OR = coef(m), confint.default(m)))
+
+# What is the c-statistic (Area under ROC curve) of this model?
 
 
