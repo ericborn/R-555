@@ -1,6 +1,7 @@
 #library(ggplot2)
 library(plotly)
 library(aod)
+library(pROC)
 
 # 1)
 #calculate the absolute value and enter a number in percent - between 0 and 100)
@@ -38,8 +39,10 @@ dat$s0 <- ifelse(dat$sex==2, 1, 0)
 
 # logisitic regression with temp_level as the response
 # and sex as the predictor or explanatory variable.
-#1.8589
-m<-glm(temp_level ~ sex, data = dat, family = 'binomial')
+m <- glm(temp_level ~ sex, data = dat, family = 'binomial')
+
+# 1.8589
+m
 
 # What is the odds ratio for girls?
 # 6.4167
@@ -47,4 +50,37 @@ exp(cbind(OR = coef(m), confint.default(m)))
 
 # What is the c-statistic (Area under ROC curve) of this model?
 
+# 4)
+# What is the c-statistic (Area under ROC curve) of this model?
+# create probabilities
+dat$prob <- predict(m, type=c("response"))
 
+# ROC Curve 
+g <- roc(dat$temp_level ~ dat$prob)
+
+# 0.7167
+g
+
+# 5)
+# Perform a multiple logistic regression predicting body temperature level from sex and heart rate. 
+# What is the regression coefficient for heart rate?
+m2 <- glm(temp_level ~ sex + heartRate, data = dat, family = 'binomial')
+
+# 0.1352
+m2
+
+# 6)
+# What is the odds ratio for sex and heart rate (for a 10 beat increase)?
+# 3.866675
+exp(m2$coefficients[3]*10)
+
+# 7)
+# What is the c-statistic (Area under ROC curve) of the multiple logistic regression 
+# predicting body temperature level from sex and heart rate?
+
+dat$prob2 <- predict(m2, type=c("response"))
+
+g2 <- roc(dat$temp_level ~ dat$prob2)
+
+# # 0.7167
+g2
