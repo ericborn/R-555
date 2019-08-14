@@ -34,8 +34,10 @@ prop.test(x=tab["1",], n=colSums(tab), correct=FALSE)
 # create dummy variables female(2) = 1, male(1) = 0
 dat$s0 <- ifelse(dat$sex==2, 1, 0)
 
+# logisitic regression with temp_level as the response
+# and sex as the predictor or explanatory variable.
+m<-glm(temp_level ~ sex, data = dat, family = 'binomial')
 
-m<-glm(s0 ~ sex , data = dat)
 summary(m)
 
-m3<-glm(pizza~Nonsense + Nonsense2, data=data, family=binomial)
+
