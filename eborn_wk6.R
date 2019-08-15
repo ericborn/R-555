@@ -1,7 +1,6 @@
 #library(ggplot2)
 library(plotly)
-install.packages('oddsratio')
-library(oddsratio)
+library(pROC)
 
 # 1)
 # Read the data into R
@@ -30,7 +29,21 @@ risk.diff <- prop.male - prop.female
 
 # test proportions
 # male/female above 98.6 as x, total male/female as y
+# tab 1 = higher body temp across both male and female
+# n=colsums(tab) is calculating the sum by column
 prop.test(x=tab['1',], n=colSums(tab), conf.level=0.95, correct=FALSE)
+
+
+# proportion of males/females with high temp at a = 0.05
+# -z to z value is +- 1.960
+-0.4307693 + 1.960 * sqrt((0.2461538*(1 - 0.2461538) / 65) + (0.6769231*(1 - 0.6769231) / 65))
+-0.4307693 - 1.960 * sqrt((0.2461538*(1 - 0.2461538) / 65) + (0.6769231*(1 - 0.6769231) / 65))
+
+# formally test if the proportion of men and women have higher than normal body temp
+(0.2461538 - 0.6769231) / sqrt((16+44)/(65+65)*(1-(16+44)/(65+65))*(1/65+1/65))
+0.4307693 / sqrt(0.4615385*(0.5384615)*(0.03076923))
+(0.6769231 - 0.2461538) / sqrt(0.007646791)
+
 
 # 3)
 # create dummy variables female(2) = 1, male(1) = 0
@@ -41,6 +54,8 @@ dat$s0 <- ifelse(dat$sex==2, 1, 0)
 # logisitic regression with temp_level as the response
 # and sex as the predictor or explanatory variable.
 m <- glm(temp_level ~ sex, data = dat, family = 'binomial')
+
+summary(m)
 
 # create probabilities
 dat$prob <- predict(m, type=c("response"))
