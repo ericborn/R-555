@@ -42,13 +42,11 @@ dat$s0 <- ifelse(dat$sex==2, 1, 0)
 m <- glm(temp_level ~ sex, data = dat, family = 'binomial')
 
 # 1.8589
-m
+summary(m)
 
 # What is the odds ratio for girls?
 # 6.4167
 exp(cbind(OR = coef(m), confint.default(m)))
-
-# What is the c-statistic (Area under ROC curve) of this model?
 
 # 4)
 # What is the c-statistic (Area under ROC curve) of this model?
