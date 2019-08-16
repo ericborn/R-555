@@ -47,15 +47,17 @@ prop.test(x=tab['1',], n=colSums(tab), conf.level=0.95, correct=FALSE)
 
 # 3)
 # create dummy variables female(2) = 1, male(1) = 0
-dat$s0 <- ifelse(dat$sex==2, 1, 0)
+dat$sex_variable <- ifelse(dat$sex==2, 1, 0)
 
 # What is the regression coefficient for girls in your logistic regression?
 
 # logisitic regression with temp_level as the response
 # and sex as the predictor or explanatory variable.
-m <- glm(temp_level ~ sex, data = dat, family = 'binomial')
+m <- glm(temp_level ~ sex_variable, data = dat, family = 'binomial')
 
 summary(m)
+
+confint(m)
 
 # create probabilities
 dat$prob <- predict(m, type=c("response"))
@@ -63,8 +65,9 @@ dat$prob <- predict(m, type=c("response"))
 # calculate odds ratio
 exp(cbind(OR = coef(m), confint(m, level = 0.95)))
 
-# What is the c-statistic (Area under ROC curve) of this model?
+#exp(coef(m))
 
+# What is the c-statistic (Area under ROC curve) of this model?
 # ROC curve 
 g <- roc(dat$temp_level ~ dat$prob)
 
@@ -76,12 +79,17 @@ plot(g)
 
 # 4)
 # Multiple logistic regression
-m2 <- glm(temp_level ~ sex + heartRate, data = dat, family = 'binomial')
+m2 <- glm(temp_level ~ sex_variable + heartRate, data = dat, family = 'binomial')
 
 summary(m2)
 
+confint(m2)
+
+exp(summary(m2)$coefficients["DSH",1] + 
+qnorm(c(0.025,0.5,0.975)) * summary(m)$coefficients["DSH",2])
+
 # calculate odds ratio
-exp(cbind(OR = coef(m2), confint(m2, level = 0.95))*10)
+exp(confint.default((m1))*10)
 
 # create probabilities
 dat$prob2 <- predict(m2, type=c("response"))

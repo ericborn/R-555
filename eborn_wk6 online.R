@@ -33,13 +33,13 @@ prop.test(x=tab["1",], n=colSums(tab), correct=FALSE)
 
 # 3)
 # create dummy variables female(2) = 1, male(1) = 0
-dat$s0 <- ifelse(dat$sex==2, 1, 0)
+dat$sex_variable <- ifelse(dat$sex==2, 1, 0)
 
 # What is the regression coefficient for girls in your logistic regression?
 
 # logisitic regression with temp_level as the response
 # and sex as the predictor or explanatory variable.
-m <- glm(temp_level ~ sex, data = dat, family = 'binomial')
+m <- glm(temp_level ~ sex_variable, data = dat, family = 'binomial')
 
 # 1.8589
 summary(m)
