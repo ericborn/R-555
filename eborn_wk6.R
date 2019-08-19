@@ -75,7 +75,7 @@ g <- roc(dat$temp_level ~ dat$prob)
 g
 
 # Plot the ROC curve
-plot(g)
+plot(g, main = 'Logistic regression ROC')
 
 # 4)
 # Multiple logistic regression
@@ -85,11 +85,8 @@ summary(m2)
 
 confint(m2)
 
-exp(summary(m2)$coefficients["DSH",1] + 
-qnorm(c(0.025,0.5,0.975)) * summary(m)$coefficients["DSH",2])
-
 # calculate odds ratio
-exp(confint.default((m1))*10)
+exp(confint.default((m2))*10)
 
 # create probabilities
 dat$prob2 <- predict(m2, type=c("response"))
@@ -97,8 +94,14 @@ dat$prob2 <- predict(m2, type=c("response"))
 # ROC curve 
 g2 <- roc(dat$temp_level ~ dat$prob2)
 
+summary(dat)
+
 # 0.7167
 g2
 
 # Plot the ROC curve
-plot(g2)
+plot(g2, main = 'Multiple logistic regression ROC')
+
+
+
+auc(g)
