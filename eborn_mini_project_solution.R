@@ -136,8 +136,8 @@ corrplot(cor.matrix, method = 'number', type = 'lower', order = 'hclust')
 
 # Highest correlation is between motor vehicle theft and burglary
 # generate a scatter plot to observe the correlation
-y <- list(title = "Property Crime")
+y <- list(title = "Motor Vehicle Theft")
 x <- list(title = 'Burglary', categoryorder = 'array', categoryarray = 'row')
 plot_ly(data = crime.df, x = ~Motor.Vehicle.Theft, y= ~Total.Burglary, 
         type = 'scatter') %>%
-  layout(title = 'Total burglaries vs total property crime', xaxis = x, yaxis = y)
+  layout(title = 'Total Burglaries vs Motor Vehicle Theft', xaxis = x, yaxis = y)
