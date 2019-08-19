@@ -1,64 +1,152 @@
+#install.packages("corrplot")
+library(plotly)
+library(corrplot)
+
 # read the csv file into R
 dat <- read.csv(file='C:/Users/TomBrody/Desktop/School/555/Final/SD-crime.csv', sep = ',')
 
 # Take a look at the data structure
 head(dat)
 
-# Remove columns 2-6, 8-9, 11-12, 14, 16 which are not being used during this analysis
-crime.df <- dat[, c(1,7,10,13,15)]
+# Remove columns 2-6, 8-9, 11-12, 15, 16 which are not being used during this analysis
+crime.df <- dat[, c(1,7,10,13,14)]
+
+# Histogram for crime distributions
+c1 <- plot_ly(crime.df, x = ~Total.Violent.Crime, type = 'histogram', name = 'Total.Violent.Crime')
+c2 <- plot_ly(crime.df, x = ~Total.Burglary, type = 'histogram', name = 'Total.Burglary')
+c3 <- plot_ly(crime.df, x = ~Total.Thefts, type = 'histogram', name = 'Total.Thefts')
+c4 <- plot_ly(crime.df, x = ~Motor.Vehicle.Theft, type = 'histogram', name = 'Total.Thefts')
+
+subplot(c1, c2, c3, c4, nrows = 2) %>% 
+  layout(title = "Crime Distribution")
 
 # create a new column containing just the year
 crime.df$year <- substr(crime.df$month, 5, 6)
 
-# summary of the entire dataset
+# summary of each main category
 summary(crime.df$Total.Violent.Crime)
 summary(crime.df$Total.Burglary)
 summary(crime.df$Total.Thefts)
+summary(crime.df$Motor.Vehicle.Theft)
 
+# create a new column to track changes from month to month
+for (row in 1:nrow(crime.df)){
+  crime.df$violent.change[row + 1] <- (crime.df$Total.Violent.Crime[row + 1]
+                             - crime.df$Total.Violent.Crime[row])
+}
 
-crime.df$Total.Violent.Crime[1]
+for (row in 1:nrow(crime.df)){
+  crime.df$burglary.change[row + 1] <- (crime.df$Total.Burglary[row  + 1]
+                                   - crime.df$Total.Burglary[row])
+}
 
-for (row in 1:length(crime.df$Total.Violent.Crime)){
-  crime.df$violent.change[row] <- (crime.df$Total.Violent.Crime[row]
-                             - crime.df$Total.Violent.Crime[row + 1])
+for (row in 1:nrow(crime.df)){
+  crime.df$thefts.change[row + 1] <- (crime.df$Total.Thefts[row + 1]
+                                    - crime.df$Total.Thefts[row])
+}
+
+for (row in 1:nrow(crime.df)){
+  crime.df$vehicle.change[row + 1] <- (crime.df$Motor.Vehicle.Theft[row + 1]
+                                  - crime.df$Motor.Vehicle.Theft[row])
+}
+
+# create a dataframe containing only the monthly changes
+crime.change <- crime.df[, c(7:10)]
+
+# review the summary of those changes
+summary(crime.change)
+
+# create sums by year for each of the main categories
+crime.year <- setNames(aggregate(list(crime.df$Total.Violent.Crime, crime.df$Total.Burglary, 
+                      crime.df$Total.Thefts, crime.df$Motor.Vehicle.Theft), 
+                 by=crime.df['year'], sum), c('year','violent', 'burglary', 'theft', 'vehicle'))
+
+# summary of the data summed by year
+summary(crime.year)
+
+# create new columns to track yearly changes
+crime.year$violent.change = 0
+crime.year$burglary.change = 0
+crime.year$thefts.change = 0
+crime.year$vehicle.change = 0
+
+# create new columns to track yearly percent changes
+crime.year$violent.pct = 0
+crime.year$burglary.pct = 0
+crime.year$thefts.pct = 0
+crime.year$vehicle.pct = 0
+
+# calculate the amount change between years
+for (row in 1:nrow(crime.year)){
+  crime.year$violent.pct[row + 1] <- (crime.year$violent[row + 1]
+                                   / crime.year$violent[row]) * 100
+}
+
+for (row in 1:nrow(crime.year)){
+  crime.year$burglary.pct[row + 1] <- (crime.year$burglary[row + 1]
+                                    / crime.year$burglary[row]) * 100
+}
+
+for (row in 1:nrow(crime.year)){
+  crime.year$thefts.pct[row + 1] <- (crime.year$theft[row + 1]
+                                  / crime.year$theft[row])* 100
+}
+
+for (row in 1:nrow(crime.year)){
+  crime.year$vehicle.pct[row + 1] <- (crime.year$vehicle[row + 1]
+                                    / crime.year$vehicle[row]) * 100
 }
 
 
-if (crime.df$Total.Violent.Crime[row] < crime.df$Total.Violent.Crime[row + 1]){
-  print
+# calculate the amount change between years
+for (row in 1:nrow(crime.year)){
+  crime.year$violent.change[row + 1] <- (crime.year$violent[row + 1]
+                                         - crime.year$violent[row])
 }
 
+for (row in 1:nrow(crime.year)){
+  crime.year$burglary.change[row + 1] <- (crime.year$burglary[row + 1]
+                                          - crime.year$burglary[row])
+}
 
-aggregate(crime.df['Total.Violent.Crime'], by=crime.df['year'], sum)
+for (row in 1:nrow(crime.year)){
+  crime.year$thefts.change[row + 1] <- (crime.year$theft[row + 1]
+                                        - crime.year$theft[row])
+}
 
-agg <- aggregate(list(crime.df$Total.Violent.Crime, crime.df$Total.Burglary, 
-                      crime.df$Total.Thefts, crime.df$Total.Property.Crime), 
-                 by=crime.df['year'], sum)
+for (row in 1:nrow(crime.year)){
+  crime.year$vehicle.change[row + 1] <- (crime.year$vehicle[row + 1]
+                                          - crime.year$vehicle[row])
+}
 
-agg$violent <- agg$c.884L..969L..1000L..1255L..1053L..964L..1169L..1080L..1141L..
-agg$burglary <- agg$c.1288L..1408L..1432L..1494L..1382L..1298L..1399L..1278L..1412L..
-agg$thefy <- agg$c.3801L..3810L..3723L..3994L..3854L..3889L..3922L..3817L..3896L..
-agg$property <- agg$c.6939L..6908L..6735L..7312L..6795L..6756L..6966L..6602L..7238L..
+# Percentage change from 2008 to 2018
+round((1 - tail(crime.year$violent, 1) / crime.year$violent[1]) * 100, 2)
+round((1 - tail(crime.year$burglary, 1) / crime.year$burglary[1]) * 100, 2)
+round((1 - tail(crime.year$theft, 1) / crime.year$theft[1]) * 100, 2)
+round((1 - tail(crime.year$vehicle, 1) / crime.year$vehicle[1]) * 100, 2)
+
+# summary of the data summed by year
+summary(crime.year)
+
+# setup correlations beteen each category
+cor.matrix <- cor(crime.df[, c(2:5)])
+
+# Plot the correlations
+corrplot(cor.matrix, method = 'number', type = 'lower', order = 'hclust')
+
+# Highest correlation is between motor vehicle theft and burglary
+# generate a scatter plot to observe the correlation
+y <- list(title = "Property Crime")
+x <- list(title = 'Burglary', categoryorder = 'array', categoryarray = 'row')
+plot_ly(data = crime.df, x = ~Motor.Vehicle.Theft, y= ~Total.Burglary, 
+        type = 'scatter') %>%
+  layout(title = 'Total Violent Crimes commited by year', xaxis = x, yaxis = y)
 
 
-crime.year <- agg[, c(6:9)]
 
 
 
 
-
-
-
-
-reshape(crime.df)
-
-# Histogram for IQ distributions
-c1 <- plot_ly(crime.df, x = ~Total.Violent.Crime, type = 'histogram', name = 'Total.Violent.Crime')
-c2 <- plot_ly(crime.df, x = ~Total.Burglary, type = 'histogram', name = 'Total.Burglary')
-c3 <- plot_ly(crime.df, x = ~Total.Thefts, type = 'histogram', name = 'Total.Thefts')
-
-subplot(c1, c2, c3, nrows = 2) %>% 
-  layout(title = "Crime Distribution")
 
 # drop empty factor levels
 crime.df <- droplevels(crime.df)
