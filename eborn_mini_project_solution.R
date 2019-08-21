@@ -10,16 +10,6 @@ crime.df <- dat[, c(1,7,10,13,14)]
 # Take a look at the data structure after removing columns
 head(crime.df)
 
-# Histogram for crime distributions
-c1 <- plot_ly(crime.df, x = ~Total.Violent.Crime, type = 'histogram', name = 'Violent Crime')
-c2 <- plot_ly(crime.df, x = ~Total.Burglary, type = 'histogram', name = 'Burglary')
-c3 <- plot_ly(crime.df, x = ~Total.Thefts, type = 'histogram', name = 'Thefts')
-c4 <- plot_ly(crime.df, x = ~Motor.Vehicle.Theft, type = 'histogram', name = 'Vehicle Thefts')
-
-# Generate the plot
-subplot(c1, c2, c3, c4, nrows = 2) %>% 
-  layout(title = "Crime Distributions")
-
 # create a new column containing just the year
 crime.df$year <- substr(crime.df$month, 5, 6)
 
@@ -51,7 +41,7 @@ for (row in 1:nrow(crime.df)){
 }
 
 # create a dataframe containing only the monthly changes
-crime.change <- crime.df[, c(6:9)]
+crime.change <- crime.df[, c(7:10)]
 
 # summary of those changes
 summary(crime.change)
@@ -134,10 +124,9 @@ cor.matrix <- cor(crime.df[, c(2:5)])
 # Plot the correlations
 corrplot(cor.matrix, method = 'number', type = 'lower', order = 'hclust')
 
-# Highest correlation is between motor vehicle theft and burglary
-# generate a scatter plot to observe the correlation
-y <- list(title = "Motor Vehicle Theft")
-x <- list(title = 'Burglary', categoryorder = 'array', categoryarray = 'row')
-plot_ly(data = crime.df, x = ~Motor.Vehicle.Theft, y= ~Total.Burglary, 
-        type = 'scatter') %>%
-  layout(title = 'Total Burglaries vs Motor Vehicle Theft', xaxis = x, yaxis = y)
+# plot the correlation between Motor Vehicle Theft and Total Burglaries
+ggplot(data = crime.df, aes(x = Motor.Vehicle.Theft, y = Total.Burglary)) + 
+  geom_point(color='blue') +
+  geom_smooth(color='red', method = "lm", se = FALSE) +
+  ggtitle('Correlation between Motor Vehicle Theft and Total Burglaries') +
+  theme(plot.title = element_text(hjust = 0.5))
